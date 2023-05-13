@@ -1,0 +1,298 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>MainWindow</class>
+ <widget class="QMainWindow" name="MainWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>640</width>
+    <height>480</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Simple USB KVM</string>
+  </property>
+  <widget class="QWidget" name="centralwidget"/>
+  <widget class="QMenuBar" name="menubar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>640</width>
+     <height>26</height>
+    </rect>
+   </property>
+   <widget class="QMenu" name="menu_video_menu">
+    <property name="title">
+     <string>Device</string>
+    </property>
+    <addaction name="action_video_devices"/>
+    <addaction name="action_video_device_connect"/>
+    <addaction name="action_video_device_disconnect"/>
+    <addaction name="separator"/>
+    <addaction name="actionReload_MCU"/>
+    <addaction name="actionReload_Key_Mouse"/>
+    <addaction name="separator"/>
+    <addaction name="actionMinimize"/>
+    <addaction name="actionexit"/>
+    <addaction name="separator"/>
+   </widget>
+   <widget class="QMenu" name="menuKeyboard">
+    <property name="title">
+     <string>Keyboard</string>
+    </property>
+    <widget class="QMenu" name="menuShortcut_key">
+     <property name="title">
+      <string>Shortcut key</string>
+     </property>
+     <addaction name="actionq1"/>
+     <addaction name="actionq2"/>
+     <addaction name="actionq3"/>
+     <addaction name="actionq4"/>
+     <addaction name="actionq5"/>
+     <addaction name="actionq6"/>
+     <addaction name="actionq7"/>
+     <addaction name="actionq_8"/>
+     <addaction name="actionq9"/>
+     <addaction name="actionq10"/>
+    </widget>
+    <addaction name="actionResetKeyboard"/>
+    <addaction name="separator"/>
+    <addaction name="menuShortcut_key"/>
+    <addaction name="actionCustomKey"/>
+    <addaction name="separator"/>
+    <addaction name="actionIndicator_light"/>
+   </widget>
+   <widget class="QMenu" name="menuMouse">
+    <property name="title">
+     <string>Mouse</string>
+    </property>
+    <addaction name="actionResetMouse"/>
+    <addaction name="separator"/>
+    <addaction name="actionCapture_mouse"/>
+    <addaction name="actionRelease_mouse"/>
+   </widget>
+   <widget class="QMenu" name="menuTools">
+    <property name="title">
+     <string>Tools</string>
+    </property>
+    <addaction name="actionOn_screen_Keyboard"/>
+    <addaction name="actionCalculator"/>
+    <addaction name="actionSnippingTool"/>
+    <addaction name="actionNotepad"/>
+   </widget>
+   <widget class="QMenu" name="menuVideo">
+    <property name="title">
+     <string>Video</string>
+    </property>
+    <addaction name="action_fullscreen"/>
+    <addaction name="action_Resize_window"/>
+   </widget>
+   <addaction name="menu_video_menu"/>
+   <addaction name="menuVideo"/>
+   <addaction name="menuKeyboard"/>
+   <addaction name="menuMouse"/>
+   <addaction name="menuTools"/>
+  </widget>
+  <widget class="QStatusBar" name="statusbar">
+   <property name="sizeGripEnabled">
+    <bool>false</bool>
+   </property>
+  </widget>
+  <action name="action_video_devices">
+   <property name="text">
+    <string>Video devices</string>
+   </property>
+   <property name="shortcut">
+    <string/>
+   </property>
+  </action>
+  <action name="action_video_device_connect">
+   <property name="text">
+    <string>Connect</string>
+   </property>
+  </action>
+  <action name="action_video_device_disconnect">
+   <property name="text">
+    <string>Disconnect</string>
+   </property>
+  </action>
+  <action name="actionexit">
+   <property name="text">
+    <string>Exit</string>
+   </property>
+  </action>
+  <action name="actionfullscreen">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>Full screen</string>
+   </property>
+   <property name="shortcutVisibleInContextMenu">
+    <bool>false</bool>
+   </property>
+  </action>
+  <action name="actionScreen_recording">
+   <property name="text">
+    <string>Screen recording</string>
+   </property>
+  </action>
+  <action name="actionResize_window">
+   <property name="text">
+    <string>Resize window</string>
+   </property>
+  </action>
+  <action name="actionResetKeyboard">
+   <property name="text">
+    <string>Reset</string>
+   </property>
+  </action>
+  <action name="actionResetMouse">
+   <property name="text">
+    <string>Reset</string>
+   </property>
+  </action>
+  <action name="action_quickkey_1">
+   <property name="text">
+    <string>Ctrl+Alt+Del</string>
+   </property>
+  </action>
+  <action name="action_quickkey_2">
+   <property name="text">
+    <string>Alt+Tab</string>
+   </property>
+  </action>
+  <action name="actionMinimize">
+   <property name="text">
+    <string>Minimize</string>
+   </property>
+  </action>
+  <action name="actionReload_Key_Mouse">
+   <property name="text">
+    <string>Reload Key/Mouse</string>
+   </property>
+  </action>
+  <action name="actionRelease_mouse">
+   <property name="text">
+    <string>Release mouse</string>
+   </property>
+  </action>
+  <action name="actionDisplay_System_Mouse">
+   <property name="text">
+    <string>Display system mouse</string>
+   </property>
+  </action>
+  <action name="actionCapture_mouse">
+   <property name="text">
+    <string>Capture mouse</string>
+   </property>
+  </action>
+  <action name="actionCustomKey">
+   <property name="text">
+    <string>Custom key</string>
+   </property>
+  </action>
+  <action name="actionq1">
+   <property name="text">
+    <string>q1</string>
+   </property>
+  </action>
+  <action name="actionq2">
+   <property name="text">
+    <string>q2</string>
+   </property>
+  </action>
+  <action name="actionq3">
+   <property name="text">
+    <string>q3</string>
+   </property>
+  </action>
+  <action name="actionq4">
+   <property name="text">
+    <string>q4</string>
+   </property>
+  </action>
+  <action name="actionq5">
+   <property name="text">
+    <string>q5</string>
+   </property>
+  </action>
+  <action name="actionq6">
+   <property name="text">
+    <string>q6</string>
+   </property>
+  </action>
+  <action name="actionq7">
+   <property name="text">
+    <string>q7</string>
+   </property>
+  </action>
+  <action name="actionq8">
+   <property name="text">
+    <string>q8</string>
+   </property>
+  </action>
+  <action name="actionq_8">
+   <property name="text">
+    <string>q8</string>
+   </property>
+  </action>
+  <action name="actionq9">
+   <property name="text">
+    <string>q9</string>
+   </property>
+  </action>
+  <action name="actionq10">
+   <property name="text">
+    <string>q10</string>
+   </property>
+  </action>
+  <action name="actionOn_screen_Keyboard">
+   <property name="text">
+    <string>On-screen Keyboard</string>
+   </property>
+  </action>
+  <action name="actionCalculator">
+   <property name="text">
+    <string>Calculator</string>
+   </property>
+  </action>
+  <action name="actionSnippingTool">
+   <property name="text">
+    <string>SnippingTool</string>
+   </property>
+  </action>
+  <action name="actionNotepad">
+   <property name="text">
+    <string>Notepad</string>
+   </property>
+  </action>
+  <action name="actionIndicator_light">
+   <property name="text">
+    <string>Indicator light</string>
+   </property>
+  </action>
+  <action name="actionReload_MCU">
+   <property name="text">
+    <string>Reload MCU</string>
+   </property>
+  </action>
+  <action name="action_fullscreen">
+   <property name="text">
+    <string>Full screen</string>
+   </property>
+  </action>
+  <action name="action_Resize_window">
+   <property name="text">
+    <string>Resize window</string>
+   </property>
+  </action>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>

@@ -1,0 +1,1 @@
+nuitka .\main_Qcamera.py --show-progress  --standalone --plugin-enable=pyqt5 --include-qt-plugins=all --output-dir=build

@@ -1,0 +1,12 @@
+
+Vendor=WCH
+MCU=CH582F
+Mcu Type=CH58x
+Link=WCH-Link
+Address=0x00000000
+Target Path=obj\HID_CompliantDev.hex
+Erase All=true
+Program=true
+Verify=true
+Reset=true
+CLKSpeed=1
