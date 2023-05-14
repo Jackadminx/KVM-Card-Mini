@@ -1,1 +1,1 @@
-nuitka .\main_Qcamera.py --show-progress  --standalone --plugin-enable=pyqt5 --include-qt-plugins=all --output-dir=build
+nuitka .\main.py --show-progress --onefile --windows-disable-console --standalone --plugin-enable=pyqt5 --include-qt-plugins=all --remove-output --output-dir=build_console

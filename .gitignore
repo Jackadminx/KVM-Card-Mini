@@ -49,10 +49,13 @@ dkms.conf
 
 venv/
 *.pyc
-
+obj/
+build/
+build_console/
 .idea/
 .vscode/
 *.mk
 *.pyc
 Firmware/HID_CompliantDev/.settings/language.settings.xml
-
+compiler.bat
+Client/compiler.bat

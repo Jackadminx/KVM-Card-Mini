@@ -20,7 +20,6 @@ buffer = [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
 mouse_buffer = [2, 0, 0, 0, 0, 0, 0, 0, 0]
 
 
-
 class MyMainWindow(QMainWindow, main_ui.Ui_MainWindow):
     def __init__(self, parent=None):
         super(MyMainWindow, self).__init__(parent)
@@ -296,7 +295,6 @@ class MyMainWindow(QMainWindow, main_ui.Ui_MainWindow):
             self.camera.stop()
             # print("video device disconnect")
             self.camerafinder.setMouseTracking(False)
-
 
     # 捕获鼠标功能
     def capture_mouse(self):
@@ -621,7 +619,6 @@ class MyMainWindow(QMainWindow, main_ui.Ui_MainWindow):
             if not self.isActiveWindow() and self.status['init_ok']:  # 窗口失去焦点时重置键盘，防止卡键
                 # print("window not active")
                 self.reset_keymouse(1)
-
 
     # 鼠标按下事件
     def mousePressEvent(self, event):
