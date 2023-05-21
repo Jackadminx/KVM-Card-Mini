@@ -15,7 +15,7 @@
 
 ## 硬件分析
 
-![PCB](.\Document\Images\PCB2.jpg)
+![PCB](./Document/Images/PCB2.jpg)
 
 1. **USB Host Type-C 接口，连接至上位机**
 2. **USB Host Type-C 接口，连接至被控端，控制键盘鼠标**
@@ -33,9 +33,9 @@
 
 ## 上位机（控制端）
 
-![01](.\Document\Images\01.png)
+![01](./Document/Images/01.png)
 
-![02](.\Document\Images\02.png)
+![02](./Document/Images/02.png)
 
 
 
@@ -51,7 +51,7 @@
 
 按住 BOOT 键同时连接至电脑
 使用 [WCHISPTool](https://www.wch.cn/downloads/WCHISPTool_Setup_exe.html) 刷入固件
-![03](.\Document\Images\03.jpg)
+![03](./Document/Images/03.jpg)
 
 若不使用调试接口，则不需要开启两线仿真接口，即步骤6
 
@@ -60,7 +60,7 @@
 配套的AT24C16 EEPROM可以直接买套片，或者用EEPROM编程器烧录。
 可以使用烧录夹在板子断电状态进行烧录。
 
-![04](.\Document\Images\04.jpg)
+![04](./Document/Images/04.jpg)
 
 MS2109的固件来自 [Yuzuki HCC HDMI](https://oshwhub.com/gloomyghost/yuzuki-hcc) 项目，可通过HEX文件编辑器编辑固件实现修改设备名。
 
