@@ -49,8 +49,7 @@
 
 ### CH582
 
-按住 BOOT 键同时连接至电脑
-使用 [WCHISPTool](https://www.wch.cn/downloads/WCHISPTool_Setup_exe.html) 刷入固件
+按住 BOOT 键同时使用USB数据线连接至电脑，然后使用 [WCHISPTool](https://www.wch.cn/downloads/WCHISPTool_Setup_exe.html) 刷入固件
 ![03](./Document/Images/03.jpg)
 
 若不使用调试接口，则不需要开启两线仿真接口，即步骤6
