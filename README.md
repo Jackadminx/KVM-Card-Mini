@@ -64,6 +64,14 @@
 
 MS2109的固件来自 [Yuzuki HCC HDMI](https://oshwhub.com/gloomyghost/yuzuki-hcc) 项目，可通过HEX文件编辑器编辑固件实现修改设备名。
 
+## 实物图
+
+![IMG_2](./Document/Images/IMG_2.jpg)
+
+![IMG_1](./Document/Images/IMG_1.jpg)
+
+*嘉立创彩色丝印版本
+
 ## 感谢
 
 https://oshwhub.com/gloomyghost/yuzuki-hcc
