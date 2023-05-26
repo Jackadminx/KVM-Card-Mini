@@ -4,7 +4,7 @@
 
 Simple KVM Console to USB 
 
-一个简单的 KVM （Keyboard Video Mouse）功能转接卡，通过上位机程序控制被控设备的屏幕和键鼠
+一个简单的 KVM （Keyboard Video Mouse）设备控制卡，通过上位机程序控制被控设备的屏幕和键鼠
 
 ## 功能特点
 
@@ -19,15 +19,15 @@ Simple KVM Console to USB
 
 ![PCB](./Document/Images/PCB2.jpg)
 
-1. **USB Host Type-C 接口，连接至上位机**
+1. **USB Host Type-C 接口，连接至上位机（控制端）**
 2. **USB Host Type-C 接口，连接至被控端，控制键盘鼠标**
-3. **标准 HDMI 输入接口**
-4. 蓝牙陶瓷天线（能用但不完全能用，没有做阻抗匹配；可选安装元器件）
+3. **标准 HDMI 视频输入接口，连接至被控端视频输出**
+4. 蓝牙陶瓷天线（``能用但不完全能用，没有做阻抗匹配``；可选安装元器件）
 5. EEPROM 支持烧录夹烧录
 6. CH582F 调试接口，只支持 WCH-Link （可选安装元器件）
 7. CH582F 
 8. MS2109
-9. CH582F 重启按钮
+9. CH582F 复位按钮
 10. CH582F USB 烧录选择按钮
 11. WS2812B（可选安装元器件）
 12. SL2.1s
