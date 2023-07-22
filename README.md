@@ -10,7 +10,7 @@ Simple KVM Console to USB
 
 - HID 协议传输，免驱动
 - 支持 BIOS 键盘控制
-- 上位机兼容非板载视频采集卡
+- 上位机程序兼容非板载视频采集卡
 - 板载 USB-HUB 芯片，减少接口数量
 - 单 MCU 双 USB Device 控制器，降低传输延迟
 - 板载蓝牙天线、调试接口，可用于MCU开发
@@ -39,13 +39,14 @@ Simple KVM Console to USB
 
 ![02](./Document/Images/02.png)
 
-
-
 - 实现屏幕显示，支持设备选择、切换输出分辨率
 - 被控端键盘控制、支持自定义快捷键，优化键盘功能逻辑
 - 被控端鼠标控制，优化鼠标捕获功能逻辑
 - 键盘指示灯显示
 - 重置 MCU 和重置 HID 连接功能
+- 支持批量文本输入
+- 全键无冲突
+- 屏幕截图
 
 ## 固件刷入
 
@@ -68,8 +69,6 @@ MS2109的固件来自 [Yuzuki HCC HDMI](https://oshwhub.com/gloomyghost/yuzuki-h
 ## 实物图
 
 ![IMG_2](./Document/Images/IMG_2.jpg)
-
-![IMG_1](./Document/Images/IMG_1.jpg)
 
 *嘉立创彩色丝印版本
 
