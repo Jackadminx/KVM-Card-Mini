@@ -20,7 +20,7 @@
      <x>0</x>
      <y>0</y>
      <width>640</width>
-     <height>26</height>
+     <height>23</height>
     </rect>
    </property>
    <widget class="QMenu" name="menu_video_menu">
@@ -61,6 +61,7 @@
     <addaction name="separator"/>
     <addaction name="menuShortcut_key"/>
     <addaction name="actionCustomKey"/>
+    <addaction name="actionPaste_text"/>
     <addaction name="separator"/>
     <addaction name="actionIndicator_light"/>
    </widget>
@@ -88,6 +89,8 @@
     </property>
     <addaction name="action_fullscreen"/>
     <addaction name="action_Resize_window"/>
+    <addaction name="separator"/>
+    <addaction name="action_Image_capture"/>
    </widget>
    <addaction name="menu_video_menu"/>
    <addaction name="menuVideo"/>
@@ -279,7 +282,7 @@
   </action>
   <action name="actionReload_MCU">
    <property name="text">
-    <string>Reload MCU</string>
+    <string>Reset MCU</string>
    </property>
   </action>
   <action name="action_fullscreen">
@@ -290,6 +293,16 @@
   <action name="action_Resize_window">
    <property name="text">
     <string>Resize window</string>
+   </property>
+  </action>
+  <action name="action_Image_capture">
+   <property name="text">
+    <string>Image capture</string>
+   </property>
+  </action>
+  <action name="actionPaste_text">
+   <property name="text">
+    <string>Paste text</string>
    </property>
   </action>
  </widget>

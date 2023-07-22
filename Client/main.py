@@ -7,11 +7,12 @@ import yaml
 from PyQt5 import QtGui
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QPixmap, QIcon, QCursor
-from PyQt5.QtMultimedia import QCameraInfo, QCamera, QCameraViewfinderSettings
+from PyQt5.QtMultimedia import QCameraInfo, QCamera, QCameraViewfinderSettings, QCameraImageCapture
 from PyQt5.QtMultimediaWidgets import QCameraViewfinder
 from PyQt5.QtWidgets import QApplication, QMainWindow, QLabel, QDesktopWidget, QMessageBox, \
-    QDialogButtonBox
+    QDialogButtonBox, QProgressDialog
 from PyQt5.uic import loadUi
+from pathlib import Path
 
 from module import hid_def
 from ui import main_ui
@@ -26,6 +27,7 @@ class MyMainWindow(QMainWindow, main_ui.Ui_MainWindow):
         self.setupUi(self)
 
         self.camera = None
+        self.capImg = None
 
         # 子窗口
         self.device_setup_dialog = loadUi("ui/device_setup_dialog.ui")
@@ -37,29 +39,38 @@ class MyMainWindow(QMainWindow, main_ui.Ui_MainWindow):
         applybutton.clicked.connect(lambda: self.shortcut_key_func(1))
         applybutton.pressed.connect(lambda: self.shortcut_key_func(2))
 
+        self.text_input_dialog = loadUi("ui/text_input.ui")
+        self.text_input_dialog.setWindowFlags(Qt.CustomizeWindowHint | Qt.WindowCloseButtonHint)
+        input_applybutton = self.text_input_dialog.buttonBox.button(QDialogButtonBox.Apply)
+        input_applybutton.clicked.connect(lambda: self.input_text_func(1))
+        input_resetbutton = self.text_input_dialog.buttonBox.button(QDialogButtonBox.Reset)
+        input_resetbutton.clicked.connect(lambda: self.input_text_func(2))
+        self.text_input_dialog.pasteButton.clicked.connect(lambda: self.input_text_func(3))
+
         # 导入外部数据
-        # with open("./Data/keyboard_hid2code.yaml", 'r') as load_f:
-        #     self.keyboard_hid2code = yaml.safe_load(load_f)
         with open("Data/keyboard_scancode2hid.yml", 'r') as load_f:
             self.keyboard_scancode2hid = yaml.safe_load(load_f)
         with open("./Data/keyboard.yaml", 'r') as load_f:
             self.keyboard_code = yaml.safe_load(load_f)
+        with open("Data/text2hid.yaml", 'r') as load_f:
+            self.text2hid = yaml.safe_load(load_f)
         with open("./Data/config.yaml", 'r') as load_f:
             self.configfile = yaml.safe_load(load_f)
         # 加载配置文件
         self.camera_config = self.configfile['camera_config']
         self.config = self.configfile['config']
         self.status = {'fullscreen': False, 'mouse_capture': False, 'mouse_jumpframe': 0, 'init_ok': False,
-                       'screen_height': 0, 'screen_width': 0}
+                       'screen_height': 0, 'screen_width': 0, 'camera_status': False, 'paste_close_flag': False}
         # 获取显示器分辨率大小
         self.desktop = QApplication.desktop()
         self.status['screen_height'] = self.desktop.screenGeometry().height()
         self.status['screen_width'] = self.desktop.screenGeometry().width()
 
         # 窗口图标
-        self.setWindowIcon(QtGui.QIcon('ui/images/24/monitor-multiple.png'))
-        self.device_setup_dialog.setWindowIcon(QtGui.QIcon('ui/images/24/import.png'))
-        self.shortcut_key_dialog.setWindowIcon(QtGui.QIcon('ui/images/24/keyboard-settings-outline.png'))
+        self.setWindowIcon(QIcon('ui/images/24/monitor-multiple.png'))
+        self.device_setup_dialog.setWindowIcon(QIcon('ui/images/24/import.png'))
+        self.shortcut_key_dialog.setWindowIcon(QIcon('ui/images/24/keyboard-settings-outline.png'))
+        self.text_input_dialog.setWindowIcon(QIcon('ui/images/24/paste.png'))
 
         # 状态栏图标
         self.statusbar_lable1 = QLabel()
@@ -96,9 +107,6 @@ class MyMainWindow(QMainWindow, main_ui.Ui_MainWindow):
         self.statusbar_lable3.setFont(font)
         self.statusbar_lable4.setFont(font)
 
-        # self.statusbar_fill = QLabel()
-        # self.statusBar().addPermanentWidget(self.statusbar_fill)
-
         # 菜单栏图标
         self.action_video_devices.setIcon(QIcon('ui/images/24/import.png'))
         self.action_video_device_connect.setIcon(QIcon('ui/images/24/video.png'))
@@ -119,12 +127,8 @@ class MyMainWindow(QMainWindow, main_ui.Ui_MainWindow):
         self.actionSnippingTool.setIcon(QIcon('ui/images/24/monitor-screenshot.png'))
         self.actionNotepad.setIcon(QIcon('ui/images/24/notebook-edit.png'))
         self.actionIndicator_light.setIcon(QIcon('ui/images/24/led-diode.png'))
-
-        # 遍历相机设备
-        cameras = QCameraInfo()
-        for i in cameras.availableCameras():
-            self.camera_config['device_name'].append(i.description())
-        print(self.camera_config['device_name'])
+        self.action_Image_capture.setIcon(QIcon('ui/images/24/monitor-screenshot.png'))
+        self.actionPaste_text.setIcon(QIcon('ui/images/24/paste.png'))
 
         # 初始化相机
         self.online_webcams = QCameraInfo.availableCameras()
@@ -142,7 +146,7 @@ class MyMainWindow(QMainWindow, main_ui.Ui_MainWindow):
                 err.setWindowTitle('Error')
                 err.setText(str(e) + "\nPlease check the configuration file")
                 err.exec()
-                sys.exit(0)
+                self.closeEvent(None)
             self.camerafinder.show()
 
         # 快捷键菜单设置快捷键名称
@@ -164,18 +168,22 @@ class MyMainWindow(QMainWindow, main_ui.Ui_MainWindow):
         self.actionCustomKey.triggered.connect(self.shortcut_key_func)
         self.actionReload_Key_Mouse.triggered.connect(lambda: self.reset_keymouse(4))
         self.actionMinimize.triggered.connect(self.window_minimized)
-        self.actionexit.triggered.connect(sys.exit)
+        self.actionexit.triggered.connect(self.closeEvent)
 
         self.device_setup_dialog.comboBox.currentIndexChanged.connect(self.update_device_setup_resolutions)
 
         self.action_fullscreen.triggered.connect(self.fullscreen_func)
         self.action_Resize_window.triggered.connect(self.resize_window_func)
+        self.action_Image_capture.triggered.connect(self.take_pic)
+        self.action_Image_capture.setEnabled(False)
+
         self.actionRelease_mouse.triggered.connect(self.release_mouse)
         self.actionCapture_mouse.triggered.connect(self.capture_mouse)
         self.actionResetKeyboard.triggered.connect(lambda: self.reset_keymouse(1))
         self.actionResetMouse.triggered.connect(lambda: self.reset_keymouse(3))
         self.actionIndicator_light.triggered.connect(self.indicatorLight_func)
         self.actionReload_MCU.triggered.connect(lambda: self.reset_keymouse(2))
+        self.actionPaste_text.triggered.connect(self.input_text_func)
 
         self.actionq1.triggered.connect(lambda: self.shortcut_key_action(0))
         self.actionq2.triggered.connect(lambda: self.shortcut_key_action(1))
@@ -207,12 +215,16 @@ class MyMainWindow(QMainWindow, main_ui.Ui_MainWindow):
         self.resize_window_func()
         self.status['init_ok'] = True
 
+        if self.configfile['camera_config']['startup_autoConnect']:
+            self.set_webcam(True)
+
     # 弹出采集卡设备设置窗口，并打开采集卡设备
     def device_config(self):
         self.device_setup_dialog.comboBox.clear()
 
         # 遍历相机设备
         cameras = QCameraInfo()
+        self.camera_config['device_name'].clear()
         for i in cameras.availableCameras():
             self.camera_config['device_name'].append(i.description())
             self.device_setup_dialog.comboBox.addItem(i.description())
@@ -256,7 +268,6 @@ class MyMainWindow(QMainWindow, main_ui.Ui_MainWindow):
     # 初始化指定配置视频设备
     def get_webcam(self, i, x, y):
         self.camera = QCamera(self.online_webcams[i])
-        # self.camera = QCamera()
         self.camera.setViewfinder(self.camerafinder)
         self.camera.setCaptureMode(QCamera.CaptureStillImage)
         self.camera.error.connect(lambda: self.alert(self.camera.errorString()))
@@ -266,7 +277,6 @@ class MyMainWindow(QMainWindow, main_ui.Ui_MainWindow):
 
         if not self.status['fullscreen']:
             self.resize(x, y + 60)
-        # self.camera.start()
 
     # 视频设备错误提示
     def alert(self, s):
@@ -289,12 +299,41 @@ class MyMainWindow(QMainWindow, main_ui.Ui_MainWindow):
                             self.camera_config['resolution_Y'])
             self.camera.start()
             self.camerafinder.setMouseTracking(True)
-            # self.camera_config['connected'] = True
+            # 设置图像捕获
+            self.capImg = QCameraImageCapture(self.camera)
+            self.capImg.setCaptureDestination(QCameraImageCapture.CaptureToFile)
+
+            self.action_Image_capture.setEnabled(True)
+            self.status['camera_status'] = True
+
+            # 保存至配置文件
+            self.configfile['camera_config']['device_No'] = self.camera_config['device_No']
+            self.configfile['camera_config']['resolution_X'] = self.camera_config['resolution_X']
+            self.configfile['camera_config']['resolution_Y'] = self.camera_config['resolution_Y']
+            self.configfile['camera_config']['device_name'] = self.camera_config['device_name']
+
+            with open("./Data/config.yaml", 'w') as load_f:
+                yaml.dump(self.configfile, load_f)
         else:
             self.device_event_handle("video_close")
-            self.camera.stop()
-            # print("video device disconnect")
             self.camerafinder.setMouseTracking(False)
+            self.action_Image_capture.setEnabled(False)
+            if self.status['camera_status']:
+                self.camera.stop()
+                self.camera.deleteLater()
+            self.status['camera_status'] = False
+
+    # 捕捉照片
+    def take_pic(self):  # 拍照响应槽函数，照片保存到文件
+        try:
+            file_name = os.path.join(
+                str(Path('.').resolve()), "SaveMedia", "image_" + time.strftime(
+                    "%Y%m%d-%H%M%S", time.localtime(int(time.time()))))
+            self.capImg.capture(file_name)
+            print(f"SaveMedia ：{file_name}.jpg")
+            self.statusBar().showMessage("Image saved to SaveMedia folder")
+        except Exception as e:
+            print(e)
 
     # 捕获鼠标功能
     def capture_mouse(self):
@@ -349,6 +388,7 @@ class MyMainWindow(QMainWindow, main_ui.Ui_MainWindow):
             elif hidinfo == 0:
                 self.device_event_handle("hid_ok")
         elif s == 4:  # hid
+            hid_def.hid_close()
             hid_code = hid_def.init_usb(hid_def.vendor_id, hid_def.usage_page)
             if hid_code == 0:
                 self.device_event_handle("hid_init_ok")
@@ -617,7 +657,6 @@ class MyMainWindow(QMainWindow, main_ui.Ui_MainWindow):
             print(e)
         else:
             if not self.isActiveWindow() and self.status['init_ok']:  # 窗口失去焦点时重置键盘，防止卡键
-                # print("window not active")
                 self.reset_keymouse(1)
 
     # 鼠标按下事件
@@ -628,7 +667,6 @@ class MyMainWindow(QMainWindow, main_ui.Ui_MainWindow):
             mouse_buffer[2] = mouse_buffer[2] | 1
         elif event.button() == Qt.RightButton:
             mouse_buffer[2] = mouse_buffer[2] | 2
-            # mouse_buffer = [2, 0, 2, 0, 0, 0, 0, 0, 0]
         elif event.button() == Qt.MidButton:
             mouse_buffer[2] = mouse_buffer[2] | 4
 
@@ -655,7 +693,7 @@ class MyMainWindow(QMainWindow, main_ui.Ui_MainWindow):
 
     # 鼠标滚动事件
     def wheelEvent(self, event):
-        mouse_wheel_buffer = [2, 0, 0, 0, 0, 0, 0, 0, 0]
+        mouse_wheel_buffer = mouse_buffer.copy()
         if not self.status['mouse_capture']:
             return
         if event.angleDelta().y() == 120:
@@ -680,11 +718,12 @@ class MyMainWindow(QMainWindow, main_ui.Ui_MainWindow):
             return
 
         x, y = event.pos().x(), event.pos().y()
-        info = 'X=' + str(x) + ' Y=' + str(y)
-        self.statusBar().showMessage(info)
 
         x_hid = int((32767 * x) / self.camerafinder.width())
         y_hid = int((32767 * (y - self.camerafinder.pos().y())) / self.camerafinder.height())
+
+        if x_hid < 0 or y_hid < 0:
+            return
 
         mouse_buffer[3] = x_hid & 0xff
         mouse_buffer[4] = x_hid >> 8
@@ -704,10 +743,15 @@ class MyMainWindow(QMainWindow, main_ui.Ui_MainWindow):
         scancode = event.nativeScanCode()
 
         scancode2hid = self.keyboard_scancode2hid.get(scancode, 0)
-        if scancode2hid != 0:
-            buffer[4] = scancode2hid
-        else:
-            buffer[4] = 0
+        if type(scancode2hid) != int:
+            return
+
+        for i in range(4, 10):
+            if buffer[i] == scancode2hid:
+                break
+            elif buffer[i] == 0:
+                buffer[i] = scancode2hid
+                break
 
         if key == Qt.Key_Control:  # Ctrl 键被按下
             buffer[2] = buffer[2] | 1
@@ -726,13 +770,6 @@ class MyMainWindow(QMainWindow, main_ui.Ui_MainWindow):
             self.device_event_handle("hid_error")
         self.shortcut_status(buffer)
 
-        '''
-        其它常用按键：
-        Qt.Key_Escape,Qt.Key_Tab,Qt.Key_Backspace,Qt.Key_Return,Qt.Key_Enter,
-        Qt.Key_Insert,Qt.Key_Delet###.Key_9,Qt.Key_Colon,Qt.Key_Semicolon,Qt.Key_Equal
-        ...
-        '''
-
     # 键盘松开事件
     def keyReleaseEvent(self, event):
         if event.isAutoRepeat():
@@ -742,8 +779,9 @@ class MyMainWindow(QMainWindow, main_ui.Ui_MainWindow):
         scancode = event.nativeScanCode()
         scancode2hid = self.keyboard_scancode2hid.get(scancode, 0)
 
-        if scancode2hid != 0:
-            buffer[4] = 0
+        for i in range(4, 10):
+            if buffer[i] == scancode2hid:
+                buffer[i] = 0
 
         if key == Qt.Key_Control:  # Ctrl 键被释放
             if buffer[2] & 1:
@@ -766,6 +804,78 @@ class MyMainWindow(QMainWindow, main_ui.Ui_MainWindow):
             self.device_event_handle("hid_error")
 
         self.shortcut_status(buffer)
+
+    def input_text_func(self, s):
+        if s == 1:
+            shift_symbol = [")", "!", "@", "#", "$", "%", "^", "&", "*", "(", "~", "_", "+", "{", "}", "|", ":", "\"",
+                            "<", ">", "?"]
+            text = self.text_input_dialog.plainTextEdit.toPlainText()
+            text_list = [char for char in text]
+            text_buffer = [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+
+            progress = QProgressDialog(None, "Cancel", 0, len(text_list), self.text_input_dialog)
+            progress.setWindowModality(Qt.WindowModal)
+            progress.setAutoClose(True)
+            progress.setWindowTitle("Transmitting")
+            progress.setWindowFlags(progress.windowFlags() & ~Qt.WindowContextHelpButtonHint)
+            progress.show()
+
+            progress.canceled.connect(lambda: self.input_text_func(4))
+            self.status['paste_close_flag'] = False
+
+            for i, item in enumerate(text_list):
+                progress.setValue(i + 1)
+                if self.status['paste_close_flag']:
+                    self.status['paste_close_flag'] = False
+                    progress.close()
+                    break
+                hid_code = self.text2hid.get(item.upper())
+                matched_symbol = [x for x in shift_symbol if x == item]
+                if type(hid_code) == int or item == '\n':
+                    if item.isupper() and item.isalpha():
+                        text_buffer[2] = 2
+                    elif matched_symbol:
+                        text_buffer[2] = 2
+                    else:
+                        text_buffer[2] = 0
+
+                    if item == '\n':
+                        text_buffer[4] = 0x28
+                    else:
+                        text_buffer[4] = hid_code
+
+                    hid_def.hid_report(text_buffer)
+                    time.sleep(0.01)
+                    hidinfo = hid_def.hid_report([1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0])
+                    if hidinfo == 1 or hidinfo == 4:
+                        self.device_event_handle("hid_error")
+                        break
+                    time.sleep(0.01)
+
+        elif s == 2:  # reset
+            self.text_input_dialog.plainTextEdit.setPlainText('')
+            return
+        elif s == 3:  # paste
+            clipboard = QApplication.clipboard()
+            clipboard_text = clipboard.text()
+            self.text_input_dialog.plainTextEdit.setPlainText(str(clipboard_text))
+            return
+        elif s == 4:
+            self.status['paste_close_flag'] = True
+            print("paste_close_flag")
+        else:
+            wm_pos = self.geometry()
+            wm_size = self.size()
+            self.text_input_dialog.move(wm_pos.x() + (wm_size.width() - 300), wm_pos.y() + (wm_size.height() - 400))
+            self.text_input_dialog.exec()
+
+    def closeEvent(self, event):
+        hid_def.hid_close()
+        if self.status['camera_status']:
+            self.camera.stop()
+            self.camera.deleteLater()
+        print("exit")
+        sys.exit()
 
 
 if __name__ == '__main__':

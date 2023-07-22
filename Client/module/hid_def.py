@@ -55,3 +55,8 @@ def hid_report(buffer=[], r_mode=False, report=0):
     else:
         d = 0
     return d
+
+
+def hid_close():
+    if 'h' in locals():
+        h.close()
