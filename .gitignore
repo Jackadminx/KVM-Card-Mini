@@ -60,4 +60,4 @@ Firmware/HID_CompliantDev/.settings/language.settings.xml
 compiler.bat
 Client/compiler.bat
 
-#Client/SaveMedia/*.jpg
+Client/SaveMedia/*.jpg

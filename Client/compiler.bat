@@ -1,1 +1,2 @@
-nuitka .\main.py --show-progress --onefile --windows-disable-console --standalone --plugin-enable=pyqt5 --include-qt-plugins=all --remove-output --output-dir=build_console
+#nuitka .\main.py --show-progress --onefile --enable-console --standalone --plugin-enable=pyqt5 --include-qt-plugins=all --remove-output --output-dir=build_console
+nuitka .\main.py --show-progress --onefile --windows-disable-console --standalone --plugin-enable=pyqt5 --include-qt-plugins=all --remove-output --output-dir=build
