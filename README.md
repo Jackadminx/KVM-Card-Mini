@@ -19,9 +19,9 @@ Simple KVM Console to USB
 
 ![PCB](./Document/Images/PCB2.jpg)
 
-1. **USB Host Type-C 接口，连接至上位机（控制端）**
-2. **USB Host Type-C 接口，连接至被控端，控制键盘鼠标**
-3. **标准 HDMI 视频输入接口，连接至被控端视频输出**
+1. **（控制端）USB Host Type-C 接口，连接至上位机**
+2. **（被控端）USB Host Type-C 接口，连接至被控端，控制键盘鼠标**
+3. **（被控端）标准 HDMI 视频输入接口，连接至被控端视频输出**
 4. 蓝牙陶瓷天线（``能用但不完全能用，没有做阻抗匹配``；可选安装元器件）
 5. EEPROM 支持烧录夹烧录
 6. CH582F 调试接口，只支持 WCH-Link （可选安装元器件）
