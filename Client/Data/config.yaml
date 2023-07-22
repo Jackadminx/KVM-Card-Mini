@@ -6,7 +6,7 @@ camera_config:
   - OBS Virtual Camera
   resolution_X: 1360
   resolution_Y: 768
-  startup_autoConnect: true
+  startup_autoConnect: false
 config:
   hide_mouse: true
   mouse_jump_frame_count: 20
