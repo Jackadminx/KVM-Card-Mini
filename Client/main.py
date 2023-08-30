@@ -148,6 +148,8 @@ class MyMainWindow(QMainWindow, main_ui.Ui_MainWindow):
                 err.exec()
                 self.closeEvent(None)
             self.camerafinder.show()
+        else:
+            QMessageBox.critical(self, "Error", "No video capture device found", QMessageBox.Ok)
 
         # 快捷键菜单设置快捷键名称
         self.actionq1.setText(self.configfile['shortcut_key']['shortcut_key_name'][0])
