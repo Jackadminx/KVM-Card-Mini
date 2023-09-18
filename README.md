@@ -4,7 +4,7 @@
 
 Simple KVM Console to USB 
 
-一个简单的 KVM （Keyboard Video Mouse）设备控制卡，通过上位机程序控制被控设备的屏幕和键鼠
+一款即插即用的 KVM （Keyboard Video Mouse）设备控制卡
 
 ## 功能特点
 
@@ -44,7 +44,7 @@ Simple KVM Console to USB
 - 被控端鼠标控制，优化鼠标捕获功能逻辑
 - 键盘指示灯显示
 - 重置 MCU 和重置 HID 连接功能
-- 支持批量文本输入
+- 批量文本输入
 - 全键无冲突
 - 屏幕截图
 
