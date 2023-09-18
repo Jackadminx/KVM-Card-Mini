@@ -1,16 +1,23 @@
-/*****************************************************************
+/***************************************************************************** 
  * File Name          : Main.c
  * Author             : Jancgk
+ * Version            : V1.1
+ * Date               : 2022/01/25
+ * Description        : 模拟兼容HID设备
  *********************************************************************************
- * Modified from WCH CH583 source code
+  * Modified from WCH CH583 source code
+ * Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
+ * Attention: This software (modified or not) and binary are used for
+ * microcontroller manufactured by Nanjing Qinheng Microelectronics.
  *******************************************************************************/
 
 #include "CH58x_common.h"
 #include "ws2812b.h"
 
 #define DevEP0SIZE 0x40
+uint8_t RGBSET[2] = {0, 0};
 // 设备描述符
-const uint8_t MyDevDescr[] = {0x12, 0x01, 0x10, 0x01, 0x00, 0x00, 0x00, DevEP0SIZE, 0x3d, 0x41, 0x07, 0x21, 0x00, 0x01, 0x01, 0x02, 0x00, 0x01};
+const uint8_t MyDevDescr[] = {0x12, 0x01, 0x00, 0x02, 0x00, 0x00, 0x00, DevEP0SIZE, 0x3d, 0x41, 0x07, 0x21, 0x00, 0x01, 0x01, 0x02, 0x00, 0x01};
 // 配置描述符
 const uint8_t MyCfgDescr[] = {
     0x09, 0x02, 0x29, 0x00, 0x01, 0x01, 0x04, 0xA0, 0x64, // 配置描述符
@@ -59,8 +66,12 @@ uint8_t HID_Buf[10] = {0x0};
 /*HID上下行数据*/
 // uint8_t HIDInData[10] = {0x0};
 uint8_t HIDOutData[10] = {0x0};
-uint8_t HIDOutDataTrigger = 0;
+// uint8_t HIDOutDataTrigger = 0;
 uint8_t HIDKeyLightsCode = 0;
+// 检查是否支持usb switch
+uint8_t USBSwitchSupportStatus = 0;
+
+uint8_t buf[3] = {0};
 
 /******** 用户自定义分配端点RAM ****************************************/
 __attribute__((aligned(4))) uint8_t EP0_Databuf[64 + 64 + 64]; // ep0(64)+ep4_out(64)+ep4_in(64)
@@ -74,7 +85,7 @@ __attribute__((aligned(4))) uint8_t EP3_Databuf[64 + 64];      // ep3_out(64)+ep
 #define U2DevEP0SIZE 0x40
 // 设备描述符
 const uint8_t U2MyDevDescr[] =
-    {0x12, 0x01, 0x10, 0x01, 0x00, 0x00, 0x00, U2DevEP0SIZE, 0x3d, 0x41,
+    {0x12, 0x01, 0x00, 0x02, 0x00, 0x00, 0x00, U2DevEP0SIZE, 0x3d, 0x41,
      0x08, 0x21, 0x00, 0x01, 0x01, 0x02, 0x00, 0x01};
 /*HID类报表描述符*/
 const uint8_t U2KeyRepDesc[] = {0x05, 0x01, 0x09, 0x06, 0xA1, 0x01, 0x05, 0x07,
@@ -142,7 +153,6 @@ const uint8_t U2MyCfgDescr[] = {
     0x09, 0x21, 0x11, 0x01, 0x00, 0x01, 0x22, 0x3e, 0x00, // HID类描述符
     0x07, 0x05, 0x81, 0x03, 0x08, 0x00, 0x0a,             // 端点描述符
     0x09, 0x04, 0x01, 0x00, 0x01, 0x03, 0x01, 0x02, 0x00, // 接口描述符,鼠标
-    // 0x09, 0x21, 0x10, 0x01, 0x00, 0x01, 0x22, 0x34, 0x00, // HID类描述符
     0x09, 0x21, 0x10, 0x01, 0x00, 0x01, 0x22, sizeof(U2MouseRepDesc) & 0xFF, sizeof(U2MouseRepDesc) >> 8, // HID类描述符
     0x07, 0x05, 0x82, 0x03, 0x06, 0x00, 0x0a                                                              // 端点描述符
 
@@ -1152,15 +1162,8 @@ void USB2_DevTransProcess(void)
  */
 void U2DevHIDMouseReport(void)
 {
-    uint8_t i;
     memcpy(pU2EP2_IN_DataBuf, U2HIDMouse, sizeof(U2HIDMouse));
     U2DevEP2_IN_Deal(sizeof(U2HIDMouse));
-
-    //    for (i = 0; i < sizeof(U2HIDMouse); i++)
-    //    {
-    //        printf(" %X ", U2HIDMouse[i]);
-    //    }
-    //    printf("\r\n");
 }
 
 /*********************************************************************
@@ -1203,9 +1206,31 @@ int main()
 {
     uint8_t s;
     SetSysClock(CLK_SOURCE_PLL_60MHz);
-
     DebugInit(); // 配置串口1用来prinft来debug
     printf("start\n");
+
+    /* 配置USB Switch GPIO */
+
+    USBSwitchSupportStatus = GPIOB_ReadPortPin(GPIO_Pin_4) ? 1 : 0;
+
+    GPIOB_ModeCfg(GPIO_Pin_4, GPIO_ModeOut_PP_20mA); // NMOS
+    GPIOB_ModeCfg(GPIO_Pin_7, GPIO_ModeOut_PP_5mA);  // IN
+    GPIOA_ModeCfg(GPIO_Pin_12, GPIO_ModeOut_PP_5mA); // EN#
+    //切换至上位机端，电源接通
+    GPIOB_SetBits(GPIO_Pin_4); // pull down
+    GPIOB_ResetBits(GPIO_Pin_7);
+    GPIOA_ResetBits(GPIO_Pin_12);
+
+    /* 配置WS2812B GPIO */
+    GPIOA_ModeCfg(GPIO_Pin_13, GPIO_ModeOut_PP_5mA);
+    printf("RGB ON\n");
+    // GRB WS2812B
+    buf[0] = 0x00;
+    buf[1] = 0x05;
+    buf[2] = 0x00;
+    SendOnePix(buf);
+
+    mDelaymS(100);
 
     pEP0_RAM_Addr = EP0_Databuf; // 配置缓存区64字节。
     pEP1_RAM_Addr = EP1_Databuf;
@@ -1220,79 +1245,9 @@ int main()
     PFIC_EnableIRQ(USB_IRQn); // 启用中断向量
     PFIC_EnableIRQ(USB2_IRQn);
 
-    /* GPIO PA15 */
-    //    GPIOA_ModeCfg(GPIO_Pin_15, GPIO_ModeIN_PD);
-
-    /* 配置WS2812B GPIO */
-    GPIOA_ModeCfg(GPIO_Pin_13, GPIO_ModeOut_PP_20mA);
-    printf("RGB ON\n");
-
-    uint8_t buf[3] = {0};
-    // GRB WS2812B
-    buf[0] = 0x00;
-    buf[1] = 0x05;
-    buf[2] = 0x00;
-    SendOnePix(buf);
-
-    mDelaymS(100);
-
     uint8_t i;
     while (1)
     {
-        if (HIDOutDataTrigger == 1)
-        {
-
-            if (HIDOutData[0] == 1)
-            {
-                printf("KEYBOARD : ");
-                for (i = 0; i < 8; i++)
-                {
-                    U2HIDKey[i] = HIDOutData[i + 2];
-                }
-                U2DevHIDKeyReport();
-            }
-
-            else if (HIDOutData[0] == 2)
-            {
-                printf("MOUSE : ");
-                for (i = 0; i < 6; i++)
-                {
-                    U2HIDMouse[i] = HIDOutData[i + 2];
-                }
-                U2DevHIDMouseReport();
-            }
-
-            else if (HIDOutData[0] == 3)
-            {
-                printf("HIDKeyLightsCode: ");
-                HID_Buf[0] = 3;
-                HID_Buf[2] = HIDKeyLightsCode;
-                DevHIDReport();
-            }
-            else if (HIDOutData[0] == 4)
-            {
-                printf("SYS_ResetExecute: ");
-                SYS_ResetExecute();
-            }
-
-            else if (HIDOutData[0] == 5)
-            {
-                printf("SET WS2812B: ");
-                // GRB
-                buf[0] = HIDOutData[2];
-                buf[1] = HIDOutData[3];
-                buf[2] = HIDOutData[4];
-                SendOnePix(buf);
-            }
-
-            for (i = 0; i < sizeof(HIDOutData); i++)
-            {
-                printf(" %X |", HIDOutData[i], i); // 遍历OUT数据
-            }
-            printf("\r\n");
-            HIDOutDataTrigger = 0;
-        }
-
         mDelayuS(1000);
     }
 }
@@ -1306,22 +1261,85 @@ int main()
  */
 void DevEP1_OUT_Deal(uint8_t l)
 { /* 用户可自定义 */
-    // uint8_t i;
-
-    // for (i = 0; i < l; i++)
-    // {
-    //     pEP1_IN_DataBuf[i] = ~pEP1_OUT_DataBuf[i];
-    // }
-    // DevEP1_IN_Deal(l);
 
     uint8_t i;
 
-    for (i = 0; i < l; i++)
+    memcpy(HIDOutData, pEP1_OUT_DataBuf, 10);
+
+    if (HIDOutData[0] == 1)
     {
-        HIDOutData[i] = pEP1_OUT_DataBuf[i];
+
+        memcpy(pU2EP1_IN_DataBuf, HIDOutData + 2, 8);
+        U2DevEP1_IN_Deal(8);
+
     }
-    HIDOutDataTrigger = 1;
-    //    printf("Trigger!!! \r\n");
+
+    else if (HIDOutData[0] == 2)
+    {
+        memcpy(pU2EP2_IN_DataBuf, HIDOutData + 2, 6);
+        U2DevEP2_IN_Deal(6);
+    }
+
+    else if (HIDOutData[0] == 3)
+    {
+        printf("HIDKeyLightsCode: ");
+        HID_Buf[0] = 3;
+        HID_Buf[2] = HIDKeyLightsCode;
+        DevHIDReport();
+    }
+    else if (HIDOutData[0] == 4)
+    {
+        printf("SYS_ResetExecute: ");
+        SYS_ResetExecute();
+    }
+
+    else if (HIDOutData[0] == 5)
+    {
+        printf("SET WS2812B: ");
+        // GRB
+        buf[0] = HIDOutData[2];
+        buf[1] = HIDOutData[3];
+        buf[2] = HIDOutData[4];
+        SendOnePix(buf);
+    }
+    else if (HIDOutData[0] == 6)
+    {
+        printf("USB SWITCH: ");
+        if (HIDOutData[2] == 0) // 信号线悬空，电源断电
+        {
+            GPIOB_ResetBits(GPIO_Pin_4); // pull up
+            GPIOB_SetBits(GPIO_Pin_7);
+            GPIOA_SetBits(GPIO_Pin_12);
+            printf("0");
+        }
+        else if (HIDOutData[2] == 1) // 切换至上位机端，电源接通
+        {
+            GPIOB_SetBits(GPIO_Pin_4); // pull down
+            GPIOB_ResetBits(GPIO_Pin_7);
+            GPIOA_ResetBits(GPIO_Pin_12);
+            printf("1");
+        }
+        else if (HIDOutData[2] == 2) // 切换至被控端，电源接通
+        {
+            GPIOB_SetBits(GPIO_Pin_4); // pull down
+            GPIOB_SetBits(GPIO_Pin_7);
+            GPIOA_ResetBits(GPIO_Pin_12);
+            printf("2");
+        }
+        else if (HIDOutData[2] == 3) // 状态查询
+        {
+            HID_Buf[0] = 6;
+            HID_Buf[2] = 3;
+            HID_Buf[3] = GPIOB_ReadPortPin(GPIO_Pin_4) ? 1 : 0;  // nmos
+            HID_Buf[4] = GPIOB_ReadPortPin(GPIO_Pin_7) ? 1 : 0;  // IN
+            HID_Buf[5] = GPIOA_ReadPortPin(GPIO_Pin_12) ? 1 : 0; // EN#
+            HID_Buf[6] = USBSwitchSupportStatus;
+            DevHIDReport();
+            printf("3");
+        }
+
+        printf("\r\n");
+    }
 }
 
 /*********************************************************************
