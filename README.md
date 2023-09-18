@@ -14,7 +14,9 @@ Simple KVM Console to USB
 - 板载 USB-HUB 芯片，减少接口数量
 - 单 MCU 双 USB Device 控制器，降低传输延迟
 - 板载蓝牙天线、调试接口，可用于MCU开发
-- USB设备主从切换
+- USB 设备主从切换
+
+[演示视频](https://www.bilibili.com/video/BV1Mh4y1o7ya)
 
 ## 硬件分析
 
