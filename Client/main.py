@@ -47,6 +47,9 @@ class MyMainWindow(QMainWindow, main_ui.Ui_MainWindow):
         input_resetbutton.clicked.connect(lambda: self.input_text_func(2))
         self.text_input_dialog.pasteButton.clicked.connect(lambda: self.input_text_func(3))
 
+        self.usb_switch_dialog = loadUi("ui/usb_switch.ui")
+        self.usb_switch_dialog.setWindowFlags(Qt.CustomizeWindowHint | Qt.WindowCloseButtonHint)
+
         # 导入外部数据
         with open("Data/keyboard_scancode2hid.yml", 'r') as load_f:
             self.keyboard_scancode2hid = yaml.safe_load(load_f)
@@ -71,6 +74,7 @@ class MyMainWindow(QMainWindow, main_ui.Ui_MainWindow):
         self.device_setup_dialog.setWindowIcon(QIcon('ui/images/24/import.png'))
         self.shortcut_key_dialog.setWindowIcon(QIcon('ui/images/24/keyboard-settings-outline.png'))
         self.text_input_dialog.setWindowIcon(QIcon('ui/images/24/paste.png'))
+        self.usb_switch_dialog.setWindowIcon(QIcon('ui/images/24/usb-flash-drive.png'))
 
         # 状态栏图标
         self.statusbar_lable1 = QLabel()
@@ -129,6 +133,7 @@ class MyMainWindow(QMainWindow, main_ui.Ui_MainWindow):
         self.actionIndicator_light.setIcon(QIcon('ui/images/24/led-diode.png'))
         self.action_Image_capture.setIcon(QIcon('ui/images/24/monitor-screenshot.png'))
         self.actionPaste_text.setIcon(QIcon('ui/images/24/paste.png'))
+        self.actionUSB_Drive.setIcon((QIcon('ui/images/24/usb-flash-drive.png')))
 
         # 初始化相机
         self.online_webcams = QCameraInfo.availableCameras()
@@ -141,12 +146,9 @@ class MyMainWindow(QMainWindow, main_ui.Ui_MainWindow):
                                 self.camera_config['resolution_Y'])
             except Exception as e:
                 print(e)
-                err = QMessageBox(self)
-                err.setIcon(QMessageBox.Critical)
-                err.setWindowTitle('Error')
-                err.setText(str(e) + "\nPlease check the configuration file")
-                err.exec()
-                self.closeEvent(None)
+                info = str(e) + "\nPlease check the configuration file"
+                QMessageBox.critical(self, "Error", info, QMessageBox.Ok)
+                self.closeEvent()
             self.camerafinder.show()
         else:
             QMessageBox.critical(self, "Error", "No video capture device found", QMessageBox.Ok)
@@ -202,6 +204,8 @@ class MyMainWindow(QMainWindow, main_ui.Ui_MainWindow):
         self.actionCalculator.triggered.connect(lambda: self.menu_tools_actions(1))
         self.actionSnippingTool.triggered.connect(lambda: self.menu_tools_actions(2))
         self.actionNotepad.triggered.connect(lambda: self.menu_tools_actions(3))
+        self.actionNotepad.triggered.connect(lambda: self.menu_tools_actions(3))
+        self.actionUSB_Drive.triggered.connect(self.usb_switch_func)
 
         # 设置聚焦方式
         self.camerafinder.setFocusPolicy(Qt.ClickFocus)
@@ -270,6 +274,7 @@ class MyMainWindow(QMainWindow, main_ui.Ui_MainWindow):
     # 初始化指定配置视频设备
     def get_webcam(self, i, x, y):
         self.camera = QCamera(self.online_webcams[i])
+        # self.camera = QCamera()
         self.camera.setViewfinder(self.camerafinder)
         self.camera.setCaptureMode(QCamera.CaptureStillImage)
         self.camera.error.connect(lambda: self.alert(self.camera.errorString()))
@@ -308,6 +313,8 @@ class MyMainWindow(QMainWindow, main_ui.Ui_MainWindow):
             self.action_Image_capture.setEnabled(True)
             self.status['camera_status'] = True
 
+            self.reset_keymouse(4)
+
             # 保存至配置文件
             self.configfile['camera_config']['device_No'] = self.camera_config['device_No']
             self.configfile['camera_config']['resolution_X'] = self.camera_config['resolution_X']
@@ -318,8 +325,10 @@ class MyMainWindow(QMainWindow, main_ui.Ui_MainWindow):
                 yaml.dump(self.configfile, load_f)
         else:
             self.device_event_handle("video_close")
+            # print("video device disconnect")
             self.camerafinder.setMouseTracking(False)
             self.action_Image_capture.setEnabled(False)
+            # self.camera_config['connected'] = False
             if self.status['camera_status']:
                 self.camera.stop()
                 self.camera.deleteLater()
@@ -352,6 +361,7 @@ class MyMainWindow(QMainWindow, main_ui.Ui_MainWindow):
     def resize_window_func(self):
         self.resize(self.camera_config['resolution_X'], self.camera_config['resolution_Y'] + 60)
         self.camerafinder.setAspectRatioMode(Qt.IgnoreAspectRatio)
+        # self.setFixedSize(self.camera_config['resolution_X'], self.camera_config['resolution_Y'] + 60)
         qr = self.frameGeometry()
         cp = QDesktopWidget().availableGeometry().center()
         qr.moveCenter(cp)
@@ -618,9 +628,12 @@ class MyMainWindow(QMainWindow, main_ui.Ui_MainWindow):
     def indicatorLight_func(self):
         reply = hid_def.hid_report([3, 0], True)
         print(reply)
-        if reply == 1 or reply == 2 or reply == 3 or reply == 4:
+        if reply == 1 or reply == 2 or reply == 4:
             self.device_event_handle("hid_error")
             print("hid error")
+            return
+        elif reply == 3:
+            QMessageBox.critical(self, "Error", "Card not supported,Update Firmware", QMessageBox.Ok)
             return
 
         if reply[0] != 3:
@@ -631,10 +644,10 @@ class MyMainWindow(QMainWindow, main_ui.Ui_MainWindow):
                         (reply[2] & (1 << 1)) and "*" or "  ") + "] Caps Lock     ""[" + (
                         (reply[2] & (1 << 2)) and "*" or "  ") + "] Scroll Lock     "
 
-        err = QMessageBox(self)
-        err.setWindowTitle('Indicator Light')
-        err.setText(messageBoxText)
-        err.exec()
+        info = QMessageBox(self)
+        info.setWindowTitle('Indicator Light')
+        info.setText(messageBoxText)
+        info.exec()
 
     # 全屏幕切换
     def fullscreen_func(self):
@@ -669,6 +682,7 @@ class MyMainWindow(QMainWindow, main_ui.Ui_MainWindow):
             mouse_buffer[2] = mouse_buffer[2] | 1
         elif event.button() == Qt.RightButton:
             mouse_buffer[2] = mouse_buffer[2] | 2
+            # mouse_buffer = [2, 0, 2, 0, 0, 0, 0, 0, 0]
         elif event.button() == Qt.MidButton:
             mouse_buffer[2] = mouse_buffer[2] | 4
 
@@ -785,16 +799,33 @@ class MyMainWindow(QMainWindow, main_ui.Ui_MainWindow):
             if buffer[i] == scancode2hid:
                 buffer[i] = 0
 
+        # if scancode2hid != 0:
+        #     buffer[4] = 0
+
+        # mapcode = self.keyboard_qt2hid.get(key, 0)
+        # scancode2hid = self.keyboard_hid2code.get(key, 0)
+        #
+        # if mapcode != 0 or scancode2hid != 0:
+        #     buffer[4] = 0
+
         if key == Qt.Key_Control:  # Ctrl 键被释放
+            # print('"Control" Release')
+            # self.statusBar().showMessage('"Control" Release')
             if buffer[2] & 1:
                 buffer[2] = buffer[2] ^ 1
         elif key == Qt.Key_Shift:  # Shift 键被释放
+            # print('"Shift" Release')
+            # self.statusBar().showMessage('"Shift" Release')
             if buffer[2] & 2:
                 buffer[2] = buffer[2] ^ 2
         elif key == Qt.Key_Alt:  # Alt 键被释放
+            # print('"Alt" Release')
+            # self.statusBar().showMessage('"Alt" Release')
             if buffer[2] & 4:
                 buffer[2] = buffer[2] ^ 4
         elif key == Qt.Key_Meta:  # Meta 键被释放
+            # print('"Meta" pressed')
+            # self.statusBar().showMessage('"Meta" Release')
             if buffer[2] & 8:
                 buffer[2] = buffer[2] ^ 8
 
@@ -866,12 +897,68 @@ class MyMainWindow(QMainWindow, main_ui.Ui_MainWindow):
             self.status['paste_close_flag'] = True
             print("paste_close_flag")
         else:
-            wm_pos = self.geometry()
+            wm_pos = self.pos()
             wm_size = self.size()
-            self.text_input_dialog.move(wm_pos.x() + (wm_size.width() - 300), wm_pos.y() + (wm_size.height() - 400))
+            self.text_input_dialog.move(wm_pos.x() + (wm_size.width() - self.text_input_dialog.geometry().width() - 20),
+                                        wm_pos.y() + (
+                                                wm_size.height() - self.text_input_dialog.geometry().height() - 50))
+            self.text_input_dialog.plainTextEdit.setPlainText('')
             self.text_input_dialog.exec()
+            # self.text_input_dialog.show()
+
+    def usb_switch_func(self):
+        # read status
+        reply = hid_def.hid_report([6, 0, 3, 0], True)
+        print(reply)
+        if reply == 1 or reply == 2 or reply == 4:
+            self.device_event_handle("hid_error")
+            print("hid error")
+            return
+        elif reply == 3:
+            QMessageBox.critical(self, "Error", "Card not supported", QMessageBox.Ok)
+            return
+        if reply[0] == 6 and reply[2] == 3:
+            print(reply)
+            # reply[3] //nmos
+            # reply[4] //IN
+            # reply[5] //EN#
+            if reply[6] == 0:
+                QMessageBox.Critical(self, "Error", "Card not supported", QMessageBox.Ok)
+            elif reply[5] == 1:
+                self.usb_switch_dialog.radioButton_float.setChecked(True)
+            elif reply[5] == 0 and reply[4] == 0:
+                self.usb_switch_dialog.radioButton_master.setChecked(True)
+            elif reply[5] == 0 and reply[4] == 1:
+                self.usb_switch_dialog.radioButton_controlled.setChecked(True)
+            else:
+                print("usb_switch reply unknown error")
+                return
+        else:
+            QMessageBox.critical(self, "Error", "Card not supported or reply error", QMessageBox.Ok)
+
+        window_close_status = self.usb_switch_dialog.exec()
+        # set usb switch
+        if window_close_status == 1:
+            payload = [6, 0, 0, 0]
+            if self.usb_switch_dialog.radioButton_float.isChecked():
+                print("0")
+            elif self.usb_switch_dialog.radioButton_master.isChecked():
+                payload[2] = 1
+                print("1")
+
+            elif self.usb_switch_dialog.radioButton_controlled.isChecked():
+                payload[2] = 2
+                print("2")
+
+            else:
+                print("usb_switch unknown error")
+                return
+            hidinfo = hid_def.hid_report(payload)
+            if hidinfo == 1 or hidinfo == 4:
+                self.device_event_handle("hid_error")
 
     def closeEvent(self, event):
+        # self.text_input_dialog.close()
         hid_def.hid_close()
         if self.status['camera_status']:
             self.camera.stop()

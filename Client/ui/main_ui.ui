@@ -20,7 +20,7 @@
      <x>0</x>
      <y>0</y>
      <width>640</width>
-     <height>23</height>
+     <height>22</height>
     </rect>
    </property>
    <widget class="QMenu" name="menu_video_menu">
@@ -44,7 +44,7 @@
     </property>
     <widget class="QMenu" name="menuShortcut_key">
      <property name="title">
-      <string>Shortcut key</string>
+      <string>Shortcut Key</string>
      </property>
      <addaction name="actionq1"/>
      <addaction name="actionq2"/>
@@ -82,6 +82,8 @@
     <addaction name="actionCalculator"/>
     <addaction name="actionSnippingTool"/>
     <addaction name="actionNotepad"/>
+    <addaction name="separator"/>
+    <addaction name="actionUSB_Drive"/>
    </widget>
    <widget class="QMenu" name="menuVideo">
     <property name="title">
@@ -105,7 +107,7 @@
   </widget>
   <action name="action_video_devices">
    <property name="text">
-    <string>Video devices</string>
+    <string>Video Devices</string>
    </property>
    <property name="shortcut">
     <string/>
@@ -182,7 +184,7 @@
   </action>
   <action name="actionRelease_mouse">
    <property name="text">
-    <string>Release mouse</string>
+    <string>Release Mouse</string>
    </property>
   </action>
   <action name="actionDisplay_System_Mouse">
@@ -192,12 +194,12 @@
   </action>
   <action name="actionCapture_mouse">
    <property name="text">
-    <string>Capture mouse</string>
+    <string>Capture Mouse</string>
    </property>
   </action>
   <action name="actionCustomKey">
    <property name="text">
-    <string>Custom key</string>
+    <string>Custom Key</string>
    </property>
   </action>
   <action name="actionq1">
@@ -277,7 +279,7 @@
   </action>
   <action name="actionIndicator_light">
    <property name="text">
-    <string>Indicator light</string>
+    <string>Indicator Light</string>
    </property>
   </action>
   <action name="actionReload_MCU">
@@ -287,22 +289,27 @@
   </action>
   <action name="action_fullscreen">
    <property name="text">
-    <string>Full screen</string>
+    <string>Full Screen</string>
    </property>
   </action>
   <action name="action_Resize_window">
    <property name="text">
-    <string>Resize window</string>
+    <string>Resize Window</string>
    </property>
   </action>
   <action name="action_Image_capture">
    <property name="text">
-    <string>Image capture</string>
+    <string>Image Capture</string>
    </property>
   </action>
   <action name="actionPaste_text">
    <property name="text">
-    <string>Paste text</string>
+    <string>Paste Text</string>
+   </property>
+  </action>
+  <action name="actionUSB_Drive">
+   <property name="text">
+    <string>USB Drive Switch</string>
    </property>
   </action>
  </widget>
