@@ -14,6 +14,7 @@ Simple KVM Console to USB
 - 板载 USB-HUB 芯片，减少接口数量
 - 单 MCU 双 USB Device 控制器，降低传输延迟
 - 板载蓝牙天线、调试接口，可用于MCU开发
+- USB设备主从切换
 
 ## 硬件分析
 
@@ -71,6 +72,12 @@ MS2109的固件来自 [Yuzuki HCC HDMI](https://oshwhub.com/gloomyghost/yuzuki-h
 ![IMG_2](./Document/Images/IMG_2.jpg)
 
 *嘉立创彩色丝印版本
+
+
+
+## [更新记录](CHANGELOG.md)
+
+
 
 ## 感谢
 
