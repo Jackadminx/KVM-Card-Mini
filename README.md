@@ -97,3 +97,7 @@ https://pro.lceda.cn/editor
 
 和其他开源或免费项目
 
+感谢 @ElluIFX 同学的制作的增强型客户端：
+https://github.com/ElluIFX/KVM-Card-Mini-PySide6
+
+
