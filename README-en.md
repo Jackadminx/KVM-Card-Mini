@@ -74,7 +74,7 @@ The firmware for the MS2109 is from the [Yuzuki HCC HDMI](https://oshwhub.com/gl
 
 HV2.0
 
-*JCB color silkscreen version
+*JLC color silkscreen version
 
 
 
