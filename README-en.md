@@ -36,7 +36,7 @@ A plug-and-play KVM (Keyboard Video Mouse) device control card.
 12. SL2.1s
 13. ESD protection (optional installation of components)
 
-## 上位机（控制端）
+## Console
 
 ![01](./Document/Images/01.png)
 
