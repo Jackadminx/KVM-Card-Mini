@@ -4,7 +4,11 @@
 
 Simple KVM Console to USB 
 
+[ENGLISH Version](https://github.com/Jackadminx/KVM-Card-Mini/blob/main/README-en.md)
+
 一款即插即用的 KVM （Keyboard Video Mouse）设备控制卡
+
+![Sketch](./Document/Images/Sketch.png)
 
 ## 功能特点
 
@@ -73,11 +77,17 @@ MS2109的固件来自 [Yuzuki HCC HDMI](https://oshwhub.com/gloomyghost/yuzuki-h
 
 ![IMG_2](./Document/Images/IMG_2.jpg)
 
+HV2.0
+
 *嘉立创彩色丝印版本
 
 
 
-## [更新记录](CHANGELOG.md)
+![kv2.6](./Document/Images/kv2.6.jpeg)
+
+HV2.6
+
+添加USB切换接口
 
 
 
@@ -101,3 +111,9 @@ https://pro.lceda.cn/editor
 https://github.com/ElluIFX/KVM-Card-Mini-PySide6
 
 
+
+## [License](https://github.com/Jackadminx/KVM-Card-Mini/blob/main/LICENSE)
+
+The MIT License (MIT)
+
+Copyright (c) 2023-2024 Jancgk
