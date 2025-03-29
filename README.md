@@ -55,6 +55,11 @@ Simple KVM Console to USB
 - 全键无冲突
 - 屏幕截图
 
+### Web Version(alpha)
+[演示地址](https://webclient.0x8991.com/)
+
+![02](./Document/Images/web_ver3.png)
+
 ## 固件刷入
 
 ### CH582
@@ -89,6 +94,9 @@ HV2.6
 
 添加USB切换接口
 
+![kv3.2](./Document/Images/kvmcard-grey.png)
+
+HV3.2 (开发验证中)
 
 
 ## 感谢
