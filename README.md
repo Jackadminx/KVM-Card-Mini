@@ -52,7 +52,8 @@ Simple KVM Console to USB
 - 键盘指示灯显示
 - 重置 MCU 和重置 HID 连接功能
 - 批量文本输入
-- 全键无冲突
+- ~~全键无冲突~~ 6键无冲突
+- 最大1000hz鼠标回报率
 - 屏幕截图
 
 ### Web Version(alpha)
